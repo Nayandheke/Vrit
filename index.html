@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vertical Card Slider</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      overflow: hidden;
+    }
+    .dragging {
+      transition: none;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center h-screen bg-gradient-to-b from-pink-500 via-red-400 to-orange-400">
+  <div class="relative w-80 h-96 perspective" id="cardContainer">
+    <div class="absolute w-full h-full p-5 text-white bg-gradient-to-r from-pink-400 to-pink-600 rounded-xl shadow-lg transform-gpu transition-all duration-300 card">Card 1</div>
+    <div class="absolute w-full h-full p-5 text-white bg-gradient-to-r from-orange-400 to-orange-600 rounded-xl shadow-lg transform-gpu transition-all duration-300 card">Card 2</div>
+    <div class="absolute w-full h-full p-5 text-white bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-xl shadow-lg transform-gpu transition-all duration-300 card">Card 3</div>
+    <div class="absolute w-full h-full p-5 text-white bg-gradient-to-r from-red-400 to-red-600 rounded-xl shadow-lg transform-gpu transition-all duration-300 card">Card 4</div>
+  </div>
+
+  <script>
+    const container = document.getElementById('cardContainer');
+    const cards = document.querySelectorAll('.card');
+    let startY = 0;
+    let currentIndex = 0;
+    let isDragging = false;
+    const threshold = 150; 
+
+    function updateCardStyles() {
+      cards.forEach((card, index) => {
+        card.style.transition = "transform 0.3s ease, opacity 0.3s ease";
+        card.style.transform = 'translateY(0) scale(1)';
+        card.style.opacity = '1';
+
+        if (index === currentIndex) {
+          card.style.transform = 'translateY(0) scale(1.2)';
+          card.style.zIndex = '10';
+        } else if (index < currentIndex) {
+          const diff = currentIndex - index;
+          card.style.transform = `translateY(-${diff * 40}px) scale(${1 - diff * 0.1})`;
+          card.style.opacity = `${1 - diff * 0.2}`;
+          card.style.zIndex = '1';
+        } else {
+          const diff = index - currentIndex;
+          card.style.transform = `translateY(${diff * 40}px) scale(${1 - diff * 0.1})`;
+          card.style.opacity = `${1 - diff * 0.2}`;
+          card.style.zIndex = '1';
+        }
+      });
+    }
+
+    container.addEventListener('mousedown', (event) => {
+      isDragging = true;
+      startY = event.clientY;
+      container.classList.add('dragging');
+    });
+
+    window.addEventListener('mousemove', (event) => {
+      if (!isDragging) return;
+
+      const deltaY = event.clientY - startY;
+
+      if (deltaY < -threshold && currentIndex < cards.length - 1) {
+        currentIndex++;
+        startY = event.clientY;
+        updateCardStyles();
+      } else if (deltaY > threshold && currentIndex > 0) {
+        currentIndex--;
+        startY = event.clientY;
+        updateCardStyles();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+      container.classList.remove('dragging');
+    });
+
+    updateCardStyles();
+  </script>
+</body>
+</html>
